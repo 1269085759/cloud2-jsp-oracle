@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="Cloud2Oracle"
+  id="myeclipse.1467343664066"
+  context-root="/Cloud2Oracle"
+  j2ee-spec="5.0"
+  archive="Cloud2Oracle.war">
+  <attributes>
+    <attribute name="webrootdir" value="/WebRoot" />
+  </attributes>
+</project-module>
+

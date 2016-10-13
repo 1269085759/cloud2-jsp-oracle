@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>HttpDownloader-Oracle演示页面</title>
+    <link href="js/downer.css" type="text/css" rel="Stylesheet" />
+    <script type="text/javascript" src="js/jquery-1.4.min.js"></script>
+    <script type="text/javascript" src="js/downer.js" charset="utf-8"></script>
+    <script type="text/javascript" src="js/json2.min.js" charset="utf-8"></script>
+    <script language="javascript" type="text/javascript">
+        var downer = new FileDownloaderMgr();
+        downer.Config["Folder"] = "F:\\ftp\\";//设置默认下载路径。
+
+        function loadAllComplete()
+        {
+            $.ajax({
+                type: "GET"
+                //, dataType: 'jsonp'
+                //, jsonp: "callback" //自定义的jsonp回调函数名称，默认为jQuery自动生成的随机函数名
+                , url: downer.Config["UrlListCmp"]
+                , data: { uid: downer.Fields["uid"], mac: downer.Browser.GetMacs(), time: Date() }
+                , success: function (msg)
+                {
+                    var json = eval("(" + decodeURIComponent(msg) + ")");
+                    var tb = $("#tbCmp");
+                    $.each(json, function (i, item)
+                    {
+                        var tmp = $("#tbHead").clone();
+                        var tdType = tmp.find('td[name="type"]');
+                        var tdName = tmp.find('td[name="name"]');
+                        var tdSize = tmp.find('td[name="size"]');
+                        var tdOp = tmp.find('td[name="op"]');
+
+                        var name = item.nameLoc;
+                        var idSvr = item.idSvr;
+                        var fd = item.f_fdTask;
+                        var fdID = item.f_fdID;
+                        var size = item.sizeLoc;
+                        var url = downer.Config["UrlDownload"]+"?fid=" + idSvr;
+
+                        if (fd == 1) { tdType.text("文件夹"); }
+                        else { tdType.text("文件"); }
+                        tdName.text(name);
+                        tdSize.text(size);
+                        tdOp.text("下载").css("cursor", "pointer").click(function ()
+                        {
+                            //文件夹
+                            if (fd == 1)
+                            {
+                                var obj = downer.AddFolder(fdID, name);
+                                obj.pFileSize.text(size);
+                                obj.pPercent.text(item.PerSvr);
+                            }
+                            else
+                            {
+                                downer.AddFile(url, name);
+                            }
+                            downer.PostFirst();
+                        });
+                        tb.append(tmp);
+                    });
+                }
+                , error: function (req, txt, err) { alert("加载数据失败！" + req.responseText); }
+                , complete: function (req, sta) { req = null; }
+            });
+        }
+
+    	$(document).ready(function ()
+    	{
+    	    downer.LoadTo("downDiv");
+
+    	    //加载HttpUploader6上传的文件列表
+    	    loadAllComplete();
+			//取MAC地址
+    		//var mac = cbMgr.Browser.GetMacs();
+    		//alert(mac[0]);
+
+    		//上传指定目录下的所有文件
+    	    //cbMgr.Browser.GetFiles("F:\\ftp\\", false);
+    	});
+    </script>
+</head>
+<body>
+    <p>此页为下载控件演示页面，与HttpUploader6配合使用。可以下载HttpUploader6数据库中的文件和文件夹</p>
+    <p><a target="_blank" href="../index.htm">打开上传页面</a></p>
+        <p><a target="_blank" href="../db/clear.jsp">清空上传数据库</a></p>
+        <p><a target="_blank" href="db/clear.jsp">清空下载数据库</a></p>
+    <table id="tbCmp" cellpadding="0" cellspacing="0" border="1" class="file_list">
+        <tr id="tbHead">
+            <td name="type">类型</td>
+            <td name="name">名称</td>
+            <td name="size">文件大小</td>
+            <td name="op">操作</td>
+        </tr>
+    </table>
+    <div id="downDiv"></div>
+    <div id="msg"></div>
+</body>
+</html>
